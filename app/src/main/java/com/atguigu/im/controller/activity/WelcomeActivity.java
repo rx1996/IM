@@ -8,6 +8,7 @@ import android.os.Bundle;
 import com.atguigu.im.MainActivity;
 import com.atguigu.im.R;
 import com.atguigu.im.base.BaseActivity;
+import com.atguigu.im.common.Modle;
 import com.hyphenate.chat.EMClient;
 
 public class WelcomeActivity extends BaseActivity {
@@ -32,21 +33,36 @@ public class WelcomeActivity extends BaseActivity {
     }
     //选择进入哪个界面
     private void selectChageActivity() {
-        new Thread(){
+//        new Thread(){
+//            @Override
+//            public void run() {
+//                super.run();
+//                //是否登录过环信服务器
+//                boolean loggedInBefore = EMClient.getInstance().isLoggedInBefore();
+//                if(loggedInBefore) {
+//                    //登录过
+//                    startActivity(new Intent(WelcomeActivity.this, MainActivity.class));
+//                }else {
+//                    //没有登录过
+//                    startActivity(new Intent(WelcomeActivity.this,LoginActivity.class));
+//                }
+//            }
+//        }.start();
+
+        Modle.getInstance().getGlobalThread().execute(new Runnable() {
             @Override
             public void run() {
-                super.run();
                 //是否登录过环信服务器
                 boolean loggedInBefore = EMClient.getInstance().isLoggedInBefore();
-                if(loggedInBefore) {
+                if (loggedInBefore){
                     //登录过
-                    startActivity(new Intent(WelcomeActivity.this, MainActivity.class));
-                }else {
+                    startActivity(new Intent(WelcomeActivity.this,MainActivity.class));
+                }else{
                     //没有登录过
                     startActivity(new Intent(WelcomeActivity.this,LoginActivity.class));
                 }
             }
-        }.start();
+        });
     }
 
     @Override
