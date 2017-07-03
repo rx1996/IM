@@ -60,7 +60,7 @@
         </receiver>
 
         <activity android:name=".controller.activity.LoginActivity" />
-        <activity android:name=".MainActivity"></activity>
+        <activity android:name=".controller.activity.MainActivity"></activity>
     </application>
 
 </manifest>

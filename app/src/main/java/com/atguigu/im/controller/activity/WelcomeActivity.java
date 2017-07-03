@@ -2,10 +2,7 @@ package com.atguigu.im.controller.activity;
 
 import android.content.Intent;
 import android.os.CountDownTimer;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 
-import com.atguigu.im.MainActivity;
 import com.atguigu.im.R;
 import com.atguigu.im.base.BaseActivity;
 import com.atguigu.im.common.Modle;
@@ -57,9 +54,11 @@ public class WelcomeActivity extends BaseActivity {
                 if (loggedInBefore){
                     //登录过
                     startActivity(new Intent(WelcomeActivity.this,MainActivity.class));
+                    finish();
                 }else{
                     //没有登录过
                     startActivity(new Intent(WelcomeActivity.this,LoginActivity.class));
+                    finish();
                 }
             }
         });
