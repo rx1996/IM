@@ -60,7 +60,8 @@
         </receiver>
 
         <activity android:name=".controller.activity.LoginActivity" />
-        <activity android:name=".controller.activity.MainActivity"></activity>
+        <activity android:name=".controller.activity.MainActivity" />
+        <activity android:name=".controller.fragment.AddContactActivity"></activity>
     </application>
 
 </manifest>
