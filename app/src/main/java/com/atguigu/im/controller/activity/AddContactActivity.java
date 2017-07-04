@@ -1,4 +1,4 @@
-package com.atguigu.im.controller.fragment;
+package com.atguigu.im.controller.activity;
 
 import android.os.Bundle;
 import android.text.TextUtils;
