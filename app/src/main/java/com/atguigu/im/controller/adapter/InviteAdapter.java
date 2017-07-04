@@ -36,6 +36,7 @@ public class InviteAdapter extends BaseAdapter {
         if (list != null && list.size() >= 0) {
             this.list.clear();
             this.list.addAll(list);
+            this.notifyDataSetChanged();
         }
     }
 
