@@ -9,6 +9,9 @@ import com.atguigu.im.common.Modle;
 import com.atguigu.im.controller.adapter.InviteAdapter;
 import com.atguigu.im.modle.bean.InvitationInfo;
 import com.atguigu.im.utils.SPUtils;
+import com.atguigu.im.utils.UiUtils;
+import com.hyphenate.chat.EMClient;
+import com.hyphenate.exceptions.HyphenateException;
 
 import java.util.List;
 
@@ -60,14 +63,60 @@ public class InviteActivity extends BaseActivity {
     }
     //inviteAdapter的回调方法
     InviteAdapter.OninviteListener onInviteListener = new InviteAdapter.OninviteListener() {
+        //接受邀请
         @Override
-        public void invitedSuccess(InvitationInfo info) {
-
+        public void invitedSuccess(final InvitationInfo info) {
+            Modle.getInstance().getGlobalThread().execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        //网络
+                        String hxid = info.getUserInfo().getHxid();
+                        EMClient.getInstance().contactManager().acceptInvitation(hxid);
+                        //本地
+                        Modle.getInstance().getHelperManager().getInvitationDAO()
+                                .updateInvitationStatus(InvitationInfo.InvitationStatus.INVITE_ACCEPT,hxid);
+                        //内存和网页
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                UiUtils.showToast("添加成功");
+                                refreshData();
+                            }
+                        });
+                    } catch (HyphenateException e) {
+                        e.printStackTrace();
+                        UiUtils.showToast(e.getMessage());
+                    }
+                }
+            });
         }
-
+        //拒绝邀请
         @Override
-        public void invitedReject(InvitationInfo info) {
-
+        public void invitedReject(final InvitationInfo info) {
+            Modle.getInstance().getGlobalThread().execute(new Runnable() {
+                @Override
+                public void run() {
+                    String hxid = info.getUserInfo().getHxid();
+                    try {
+                        //网络
+                        EMClient.getInstance().contactManager().declineInvitation(hxid);
+                        //本地
+                        Modle.getInstance().getHelperManager().getInvitationDAO().removeInvitation(hxid);
+                        //内存和网页
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                UiUtils.showToast("拒绝成功");
+                                refreshData();
+                            }
+                        });
+                    } catch (HyphenateException e) {
+                        e.printStackTrace();
+                        UiUtils.showToast(e.getMessage());
+                    }
+                }
+            });
         }
     };
 }
