@@ -11,11 +11,21 @@ import android.widget.LinearLayout;
 
 import com.atguigu.im.R;
 import com.atguigu.im.common.Constant;
+import com.atguigu.im.common.Modle;
 import com.atguigu.im.controller.activity.AddContactActivity;
 import com.atguigu.im.controller.activity.InviteActivity;
+import com.atguigu.im.modle.bean.UserInfo;
 import com.atguigu.im.utils.SPUtils;
 import com.atguigu.im.utils.UiUtils;
+import com.hyphenate.chat.EMClient;
+import com.hyphenate.easeui.domain.EaseUser;
 import com.hyphenate.easeui.ui.EaseContactListFragment;
+import com.hyphenate.exceptions.HyphenateException;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2017/7/3.
@@ -30,6 +40,13 @@ public class ContactListFragment extends EaseContactListFragment {
         }
     };
     private ImageView redView;
+    private BroadcastReceiver contactReceiver = new BroadcastReceiver() {
+        //添加或删除好友 调用此方法
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+        }
+    };
     @Override
     protected void initView() {
         super.initView();
@@ -49,7 +66,70 @@ public class ContactListFragment extends EaseContactListFragment {
         });
         //注册监听
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(getActivity());
+        //邀请信息发生改变
         manager.registerReceiver(inviteReciver,new IntentFilter(Constant.NEW_INVITE_CHANGE));
+        //联系人发生改变
+        manager.registerReceiver(contactReceiver,new IntentFilter(Constant.CONTACT_CHANGE));
+        //展示联系人
+        showContact();
+    }
+
+    private void showContact() {
+        //判断是否是第一次进入应用 第一次需要从服务器获取联系人 否则直接从数据库
+        refreshServer();
+    }
+
+    //从服务器获取好友列表
+    private void refreshServer() {
+        Modle.getInstance().getGlobalThread().execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    //网络
+                    List<String> contacts = EMClient.getInstance().contactManager().getAllContactsFromServer();
+                    //本地   数据转换
+                    List<UserInfo> userInfos = new ArrayList<UserInfo>();
+                    for (String contacs:contacts){
+                        UserInfo userInfo = new UserInfo(contacs,contacs);
+                        userInfos.add(userInfo);
+                    }
+                    //保存从服务器获取的联系人
+                    Modle.getInstance().getHelperManager().getContactDAO().saveContacts(userInfos,true);
+                    //内存和页面
+                    if(getActivity() == null) {
+                        return;
+                    }
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            refreshData();
+                        }
+                    });
+                } catch (HyphenateException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+    //从本地获取联系人数据
+    private void refreshData() {
+        //从数据库获取所有联系人
+        List<UserInfo> contacts = Modle.getInstance().getHelperManager().getContactDAO().getContacts();
+        //校验
+        if(contacts != null) {
+            //添加数据
+            Map<String,EaseUser> map = new HashMap<>();
+            //数据类型转换
+            for (UserInfo info : contacts){
+                map.put(info.getHxid(),new EaseUser(info.getUsername()));
+            }
+            setContactsMap(map);
+            //获取数据
+            getContactList();
+            //刷新数据
+            contactListLayout.refresh();
+        }
+
     }
 
     //判断小红点是否展示
