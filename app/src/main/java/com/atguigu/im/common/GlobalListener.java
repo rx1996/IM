@@ -16,7 +16,7 @@ import com.hyphenate.chat.EMClient;
  */
 
 public class GlobalListener {
-    private final LocalBroadcastManager manager;
+    private  LocalBroadcastManager manager;
     public GlobalListener(Context context){
         EMClient.getInstance().contactManager().setContactListener(emContactListener);
         //本地广播
@@ -36,6 +36,7 @@ public class GlobalListener {
             InvitationInfo invitationInfo = new InvitationInfo();
             invitationInfo.setReason(reason);
             invitationInfo.setUserInfo(new UserInfo(username,username));
+            invitationInfo.setStatus(InvitationInfo.InvitationStatus.NEW_INVITE);
             //添加InvitationInfo
             Modle.getInstance().getHelperManager().getInvitationDAO().addInvitation(invitationInfo);
             //保存小红点
